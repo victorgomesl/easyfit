@@ -104,7 +104,7 @@ Quer brincar com o EasyFit localmente? É moleza! Siga o passo a passo:
 ## Onde o EasyFit Está Hospedado? 🌐
 
 O app tá no ar e rodando lisinho na Vercel! Dá um pulo lá:  
-👉 [https://easyfit.vercel.app](https://easyfit.vercel.app)
+👉 [https://easyfit-omega.vercel.app/](https://easyfit-omega.vercel.app/)
 
 ---
 
