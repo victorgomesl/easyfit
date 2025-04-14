@@ -28,7 +28,11 @@ interface DayData {
   calories: number;
 }
 
-export default function CardCaloriesWeek() {
+interface CardCaloriesWeekProps {
+  refreshTrigger: number;
+}
+
+export default function CardCaloriesWeek({ refreshTrigger }: CardCaloriesWeekProps) {
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [weeklyGoal, setWeeklyGoal] = useState<number>(14000);
@@ -111,7 +115,7 @@ export default function CardCaloriesWeek() {
       setTotal(adjustedTotal);
       const daily = generateDailyData(adjustedTotal, weekOffset);
       setDailyData(daily);
-  
+
       const lastWeekTotal = adjustedTotal * 0.9 + Math.random() * 0.2 * adjustedTotal;
       if (adjustedTotal > lastWeekTotal * 1.05) {
         setTrend("up");
@@ -136,7 +140,7 @@ export default function CardCaloriesWeek() {
         throw new Error("Erro ao buscar dados do usuário");
       }
       const data = await res.json();
-      setWeeklyGoal(data.weeklyCalorieGoal ?? 14000);
+      setWeeklyGoal(data.weeklyCalorieGoal ?? data.dailyCalorieGoal * 7 ?? 14000);
     } catch (error: any) {
       toast.error(error.message || "Erro ao buscar meta semanal");
       setWeeklyGoal(14000);
@@ -146,11 +150,9 @@ export default function CardCaloriesWeek() {
   useEffect(() => {
     fetchUserGoal();
     fetchCalories();
-  }, [weekOffset]);
+  }, [weekOffset, refreshTrigger]);
 
   const percentOfGoal = Math.min(Math.round((total / weeklyGoal) * 100), 100);
-
-  const maxCalories = Math.max(...dailyData.map((d) => d.calories), 1);
 
   const previousWeek = () => setWeekOffset(weekOffset - 1);
   const nextWeek = () => setWeekOffset(Math.min(weekOffset + 1, 0));
@@ -252,20 +254,23 @@ export default function CardCaloriesWeek() {
       {!loading && (
         <CardFooter className="border-t bg-muted/20 py-3">
           <div className="flex items-center text-sm">
-            {trend === "up" ? (
+            {total > weeklyGoal ? (
               <>
                 <TrendingUp className="mr-1.5 h-4 w-4 text-red-500" />
-                <span>5% acima da semana anterior</span>
-              </>
-            ) : trend === "down" ? (
-              <>
-                <TrendingDown className="mr-1.5 h-4 w-4 text-green-500" />
-                <span>8% abaixo da semana anterior</span>
+                <span className="text-red-500 font-medium">
+                  Excedeu a meta em {(total - weeklyGoal).toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kcal
+                </span>
               </>
             ) : (
               <>
-                <TrendingUp className="mr-1.5 h-4 w-4 text-yellow-500" />
-                <span>Estável em relação à semana anterior</span>
+                <TrendingUp className="mr-1.5 h-4 w-4 text-green-500" />
+                <span>
+                  Restam{" "}
+                  <span className="font-medium">
+                    {(weeklyGoal - total).toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kcal
+                  </span>{" "}
+                  para a semana
+                </span>
               </>
             )}
           </div>

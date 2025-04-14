@@ -1,15 +1,28 @@
-"use client"
+"use client";
 
-import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
-import { toast } from "sonner"
-import DialogAddMeal from "./dialog-add-meal"
-import DialogEditMeal from "./dialog-edit-meal"
-import DialogViewMeal from "./dialog-view-meal"
-import DialogDeleteMeal from "./dialog-delete-meal"
-import { Button } from "@/components/ui/button"
-import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import DialogAddMeal from "./dialog-add-meal";
+import DialogEditMeal from "./dialog-edit-meal";
+import DialogViewMeal from "./dialog-view-meal";
+import DialogDeleteMeal from "./dialog-delete-meal";
+import { Button } from "@/components/ui/button";
+import {
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,12 +30,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Edit, Eye, Filter, MoreHorizontal, Plus, Search, SlidersHorizontal, Trash2 } from 'lucide-react'
-import { Skeleton } from "@/components/ui/skeleton"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Edit, Eye, Filter, MoreHorizontal, Plus, Search, SlidersHorizontal, Trash2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Pagination,
   PaginationContent,
@@ -31,97 +50,105 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
-import ExportButton from "@/components/dashboard/export-button"
+} from "@/components/ui/pagination";
+import ExportButton from "@/components/dashboard/export-button";
 
 interface Meal {
-  id: string
-  name: string
-  description?: string
-  calories: number
-  dateTime: string
-  type: "Café da manhã" | "Almoço" | "Lanche da tarde" | "Janta"
+  id: string;
+  name: string;
+  description?: string;
+  calories: number;
+  dateTime: string;
+  type: "Café da manhã" | "Almoço" | "Lanche da tarde" | "Janta";
 }
 
 interface ColumnVisibility {
-  name: boolean
-  description: boolean
-  calories: boolean
-  dateTime: boolean
-  type: boolean
+  name: boolean;
+  description: boolean;
+  calories: boolean;
+  dateTime: boolean;
+  type: boolean;
 }
 
-export default function TableListMeal() {
-  const [meals, setMeals] = useState<Meal[]>([])
-  const [loading, setLoading] = useState<boolean>(false)
-  const [addMealOpen, setAddMealOpen] = useState(false)
-  const [editMealOpen, setEditMealOpen] = useState(false)
-  const [viewMealOpen, setViewMealOpen] = useState(false)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [typeFilter, setTypeFilter] = useState<string>("all")
+interface TableListMealProps {
+  onMealChange?: () => void;
+}
+
+export default function TableListMeal({ onMealChange }: TableListMealProps) {
+  const [meals, setMeals] = useState<Meal[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [addMealOpen, setAddMealOpen] = useState(false);
+  const [editMealOpen, setEditMealOpen] = useState(false);
+  const [viewMealOpen, setViewMealOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
     name: true,
     description: true,
     calories: true,
     dateTime: true,
     type: true,
-  })
+  });
 
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   async function fetchMeals() {
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await fetch("/api/meals")
+      const res = await fetch("/api/meals");
       if (!res.ok) {
-        throw new Error("Erro ao buscar refeições")
+        throw new Error("Erro ao buscar refeições");
       }
-      const data = await res.json()
-
-      const sortedData = [...data].sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime())
-      setMeals(sortedData)
+      const data = await res.json();
+      const sortedData = [...data].sort(
+        (a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
+      );
+      setMeals(sortedData);
     } catch (error: any) {
-      toast.error(error.message || "Erro ao buscar refeições")
+      toast.error(error.message || "Erro ao buscar refeições");
     }
-    setLoading(false)
+    setLoading(false);
   }
 
   useEffect(() => {
-    fetchMeals()
-  }, [])
+    fetchMeals();
+  }, []);
 
   function refreshMeals() {
-    fetchMeals()
+    fetchMeals();
+    if (onMealChange) {
+      onMealChange();
+    }
   }
 
   function getMealTypeBadgeColor(type: string) {
     switch (type) {
       case "Café da manhã":
-        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100";
       case "Almoço":
-        return "bg-green-100 text-green-800 hover:bg-green-100"
+        return "bg-green-100 text-green-800 hover:bg-green-100";
       case "Lanche da tarde":
-        return "bg-orange-100 text-orange-800 hover:bg-orange-100"
+        return "bg-orange-100 text-orange-800 hover:bg-orange-100";
       case "Janta":
-        return "bg-blue-100 text-blue-800 hover:bg-blue-100"
+        return "bg-blue-100 text-blue-800 hover:bg-blue-100";
       default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100"
+        return "bg-gray-100 text-gray-800 hover:bg-gray-100";
     }
   }
 
   function formatDateTime(dateTimeStr: string) {
     try {
-      const date = new Date(dateTimeStr)
-      const day = String(date.getDate()).padStart(2, "0")
-      const month = String(date.getMonth() + 1).padStart(2, "0")
-      const hours = String(date.getHours()).padStart(2, "0")
-      const minutes = String(date.getMinutes()).padStart(2, "0")
-      return `${day}/${month} ${hours}:${minutes}`
+      const date = new Date(dateTimeStr);
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      return `${day}/${month} ${hours}:${minutes}`;
     } catch (e) {
-      return dateTimeStr
+      return dateTimeStr;
     }
   }
 
@@ -129,19 +156,19 @@ export default function TableListMeal() {
     const matchesSearch =
       meal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (meal.description && meal.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      meal.type.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesType = typeFilter === "all" || meal.type === typeFilter
-    return matchesSearch && matchesType
-  })
+      meal.type.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = typeFilter === "all" || meal.type === typeFilter;
+    return matchesSearch && matchesType;
+  });
 
-  const totalPages = Math.ceil(filteredMeals.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentMeals = filteredMeals.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredMeals.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentMeals = filteredMeals.slice(startIndex, endIndex);
 
   const generatePaginationLinks = () => {
-    const links = []
-    const maxVisiblePages = 5
+    const links = [];
+    const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
@@ -151,7 +178,7 @@ export default function TableListMeal() {
               {i}
             </PaginationLink>
           </PaginationItem>
-        )
+        );
       }
     } else {
       links.push(
@@ -160,16 +187,16 @@ export default function TableListMeal() {
             1
           </PaginationLink>
         </PaginationItem>
-      )
+      );
       if (currentPage > 3) {
         links.push(
           <PaginationItem key="ellipsis-start">
             <PaginationEllipsis />
           </PaginationItem>
-        )
+        );
       }
-      const startPage = Math.max(2, currentPage - 1)
-      const endPage = Math.min(totalPages - 1, currentPage + 1)
+      const startPage = Math.max(2, currentPage - 1);
+      const endPage = Math.min(totalPages - 1, currentPage + 1);
       for (let i = startPage; i <= endPage; i++) {
         links.push(
           <PaginationItem key={i}>
@@ -177,14 +204,14 @@ export default function TableListMeal() {
               {i}
             </PaginationLink>
           </PaginationItem>
-        )
+        );
       }
       if (currentPage < totalPages - 2) {
         links.push(
           <PaginationItem key="ellipsis-end">
             <PaginationEllipsis />
           </PaginationItem>
-        )
+        );
       }
       if (totalPages > 1) {
         links.push(
@@ -193,26 +220,26 @@ export default function TableListMeal() {
               {totalPages}
             </PaginationLink>
           </PaginationItem>
-        )
+        );
       }
     }
-    return links
-  }
+    return links;
+  };
 
   const handleViewMeal = (meal: Meal) => {
-    setSelectedMeal(meal)
-    setViewMealOpen(true)
-  }
+    setSelectedMeal(meal);
+    setViewMealOpen(true);
+  };
 
   const handleEditMeal = (meal: Meal) => {
-    setSelectedMeal(meal)
-    setEditMealOpen(true)
-  }
+    setSelectedMeal(meal);
+    setEditMealOpen(true);
+  };
 
   const handleDeleteMeal = (meal: Meal) => {
-    setSelectedMeal(meal)
-    setDeleteDialogOpen(true)
-  }
+    setSelectedMeal(meal);
+    setDeleteDialogOpen(true);
+  };
 
   return (
     <>
@@ -480,5 +507,5 @@ export default function TableListMeal() {
         </>
       )}
     </>
-  )
+  );
 }

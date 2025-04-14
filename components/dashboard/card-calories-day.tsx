@@ -14,7 +14,11 @@ import { toast } from "sonner";
 import { Calendar, Flame, TrendingUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
-export default function CardCaloriesDay() {
+interface CardCaloriesDayProps {
+  refreshTrigger: number;
+}
+
+export default function CardCaloriesDay({ refreshTrigger }: CardCaloriesDayProps) {
   const [total, setTotal] = useState<number>(0);
   const [goal, setGoal] = useState<number>(2000);
   const [loading, setLoading] = useState<boolean>(false);
@@ -57,13 +61,13 @@ export default function CardCaloriesDay() {
   }
 
   useEffect(() => {
-    setPercentOfGoal(Math.min(Math.round((total / goal) * 100), 100));
-  }, [total, goal]);
-
-  useEffect(() => {
     fetchUserGoal();
     fetchCalories();
-  }, []);
+  }, [refreshTrigger]);
+
+  useEffect(() => {
+    setPercentOfGoal(Math.min(Math.round((total / goal) * 100), 100));
+  }, [total, goal]);
 
   const formatCurrentDate = () => {
     const now = new Date();
@@ -146,7 +150,7 @@ export default function CardCaloriesDay() {
             <span>
               {total > goal ? (
                 <span className="text-red-500 font-medium">
-                  Excedeu a meta em {goal.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kcal
+                  Excedeu a meta em {(total - goal).toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kcal
                 </span>
               ) : (
                 <span>

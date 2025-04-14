@@ -1,14 +1,12 @@
-import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
-import { authOptions } from "@/lib/auth"
-import TableListMeal from "@/components/dashboard/table-list-meal"
-import CardCaloriesDay from "@/components/dashboard/card-calories-day"
-import CardCaloriesWeek from "@/components/dashboard/card-calories-week"
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/auth";
+import DashboardClient from "@/components/dashboard/dashboard-client";
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
   if (!session) {
-    redirect("/login")
+    redirect("/login");
   }
 
   return (
@@ -24,16 +22,9 @@ export default async function DashboardPage() {
 
       <main className="flex-1 p-6">
         <div className="mx-auto max-w-7xl space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <CardCaloriesDay />
-            <CardCaloriesWeek />
-          </div>
-
-          <div className="bg-card rounded-lg border border-border shadow-sm">
-            <TableListMeal />
-          </div>
+          <DashboardClient />
         </div>
       </main>
     </div>
-  )
+  );
 }
